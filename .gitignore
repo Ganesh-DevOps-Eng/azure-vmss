@@ -1,0 +1,12 @@
+# Ignore Terraform lock file
+.terraform.lock.hcl
+
+# Ignore Terraform module files
+.terraform/modules/
+
+# Ignore Terraform provider files
+.terraform/providers/
+.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.114.0/windows_amd64/terraform-provider-azurerm_v3.114.0_x5.exe
+
+# Ignore entire .terraform directory
+.terraform/*

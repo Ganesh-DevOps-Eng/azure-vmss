@@ -1,0 +1,11 @@
+vnet_name = tomVNet
+address_space = ["10.0.0.0/16"]
+location = "eastus2"
+resource_group_name = "tom"
+public_subnet_prefix = "10.0.1.0/24"
+private_subnet_a_prefix = "10.0.2.0/24"
+private_subnet_b_prefix = "10.0.3.0/24"
+vm_size  = "Standard_B1s"
+admin_username = "adminuser"
+admin_password = "P@ssw0rd1234"
+dns_name = "myBastion"
