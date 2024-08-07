@@ -73,3 +73,9 @@ resource "azurerm_network_security_rule" "allow-http-8080" {
   network_security_group_name = azurerm_network_security_group.nsg.name
   resource_group_name         = var.resource_group_name
 }
+
+
+resource "azurerm_subnet_network_security_group_association" "subnet_nsg_association" {
+  subnet_id                 = azurerm_subnet.private_subnet_a.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}

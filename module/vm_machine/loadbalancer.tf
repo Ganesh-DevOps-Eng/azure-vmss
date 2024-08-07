@@ -27,7 +27,7 @@ resource "azurerm_lb_probe" "main" {
   name            = "http-probe"
   protocol        = "Http"
   request_path    = "/health"
-  port            = 8080
+  port            = 80
 }
 
 resource "azurerm_lb_rule" "lbrule" {
@@ -36,17 +36,6 @@ resource "azurerm_lb_rule" "lbrule" {
   protocol                       = "Tcp"
   frontend_port                  = 80
   backend_port                   = 80
-  frontend_ip_configuration_name = "PublicIPAddress"
-  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.backend_pool.id]
-  probe_id                       = azurerm_lb_probe.main.id
-}
-
-resource "azurerm_lb_rule" "http_rule_8080" {
-  loadbalancer_id                = azurerm_lb.load_balancer.id
-  name                           = "http-rule-8080"
-  protocol                       = "Tcp"
-  frontend_port                  = 8080
-  backend_port                   = 8080
   frontend_ip_configuration_name = "PublicIPAddress"
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.backend_pool.id]
   probe_id                       = azurerm_lb_probe.main.id
