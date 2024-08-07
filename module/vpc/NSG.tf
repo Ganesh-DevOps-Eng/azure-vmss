@@ -59,3 +59,17 @@ resource "azurerm_network_security_rule" "allow_icmp" {
   network_security_group_name = azurerm_network_security_group.nsg.name
   resource_group_name         = var.resource_group_name
 }
+
+resource "azurerm_network_security_rule" "allow-http-8080" {
+  name                        = "allow-http-8080"
+  priority                    = 1004
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_ranges     = ["8080"]
+  source_address_prefixes     = ["0.0.0.0/0"]
+  destination_address_prefix  = "*"
+  network_security_group_name = azurerm_network_security_group.nsg.name
+  resource_group_name         = var.resource_group_name
+}

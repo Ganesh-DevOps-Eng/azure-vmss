@@ -1,4 +1,4 @@
-vnet_name = tomVNet
+vnet_name = "tomVNet"
 address_space = ["10.0.0.0/16"]
 location = "eastus2"
 resource_group_name = "tom"
