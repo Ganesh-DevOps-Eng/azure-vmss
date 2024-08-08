@@ -79,3 +79,8 @@ resource "azurerm_subnet_network_security_group_association" "subnet_nsg_associa
   subnet_id                 = azurerm_subnet.private_subnet_a.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
+
+resource "azurerm_subnet_network_security_group_association" "public_subnet_nsg_association" {
+  subnet_id                 = azurerm_subnet.public_subnet.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}

@@ -32,3 +32,16 @@ resource "azurerm_subnet" "bastion_subnet" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.4.0/24"]  # Choose an appropriate prefix for the Bastion subnet
 }
+
+
+resource "azurerm_nat_gateway" "nat_gateway" {
+  name                = "${var.resource_group_name}-nat-gateway"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+}
+
+
+resource "azurerm_subnet_nat_gateway_association" "public_subnet_nat_gateway" {
+  subnet_id       = azurerm_subnet.public_subnet.id
+  nat_gateway_id  = azurerm_nat_gateway.nat_gateway.id
+}

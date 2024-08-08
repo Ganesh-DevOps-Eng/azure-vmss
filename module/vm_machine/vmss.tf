@@ -17,10 +17,13 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
 
   automatic_os_upgrade = true
   upgrade_policy_mode  = "Rolling"
+  lifecycle  {
+    create_before_destroy=true
+ }
 
   rolling_upgrade_policy {
     max_batch_instance_percent              = 20
-    max_unhealthy_instance_percent          = 20
+    max_unhealthy_instance_percent          = 50
     max_unhealthy_upgraded_instance_percent = 5
     pause_time_between_batches              = "PT0S"
   }
@@ -28,9 +31,10 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   health_probe_id = azurerm_lb_probe.main.id
 
   sku {
-    name     = "Standard_F2"
+    name     = var.vm_size
     tier     = "Standard"
     capacity = 2
+    
   }
 
   storage_profile_image_reference {
@@ -39,6 +43,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+  
 
   storage_profile_os_disk {
     name              = ""
@@ -64,7 +69,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
 
     ssh_keys {
       path     = "/home/adminuser/.ssh/authorized_keys"
-      key_data = file("C:/Users/Sanatan_Coaching/.ssh/id_rsa.pub")
+      key_data = file("C:/Users/cgt_jpr_pc_Admin/.ssh/id_rsa.pub")
     }
   }
 
@@ -85,3 +90,21 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
     environment = "staging"
   }
 }
+
+resource "azurerm_virtual_machine_scale_set_extension" "provision" {
+  name                         = "provision-scal_set"
+  virtual_machine_scale_set_id = azurerm_virtual_machine_scale_set.vmss.id
+  publisher                    = "Microsoft.Azure.Extensions"
+  type                         = "CustomScript"
+  type_handler_version         = "2.0"
+
+  settings = jsonencode({
+    "script" = "init_script.sh"
+  })
+
+  protected_settings = jsonencode({
+    "fileUris"         = ["https://raw.githubusercontent.com/Ganesh-DevOps-Eng/php-postgres/main/init_script.sh"],
+    "commandToExecute" = "bash init_script.sh"
+  })
+}
+
