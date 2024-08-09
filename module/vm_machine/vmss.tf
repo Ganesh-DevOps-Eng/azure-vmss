@@ -16,17 +16,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   resource_group_name = var.resource_group_name
 
   automatic_os_upgrade = true
-  upgrade_policy_mode  = "Rolling"
-  lifecycle  {
-    create_before_destroy=true
- }
-
-  rolling_upgrade_policy {
-    max_batch_instance_percent              = 20
-    max_unhealthy_instance_percent          = 50
-    max_unhealthy_upgraded_instance_percent = 5
-    pause_time_between_batches              = "PT0S"
-  }
+  upgrade_policy_mode  = "Automatic"
 
   health_probe_id = azurerm_lb_probe.main.id
 
@@ -89,6 +79,65 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   tags = {
     environment = "staging"
   }
+  lifecycle  {
+    create_before_destroy=true
+ }
+}
+
+resource "azurerm_monitor_autoscale_setting" "autoscale" {
+  name                = "example-autoscale"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  target_resource_id  = azurerm_virtual_machine_scale_set.vmss.id
+
+  profile {
+    name = "defaultProfile"
+    capacity {
+      minimum = "2"    # Set to match your desired instance count
+      maximum = "5"
+      default = "2"
+    }
+
+    rule {
+      metric_trigger {
+        metric_name        = "Percentage CPU"
+        metric_resource_id = azurerm_virtual_machine_scale_set.vmss.id
+        operator           = "GreaterThan"
+        statistic          = "Average"
+        threshold          = 75
+        time_grain         = "PT1M"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+      }
+
+      scale_action {
+        direction = "Increase"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT5M"
+      }
+    }
+
+    rule {
+      metric_trigger {
+        metric_name        = "Percentage CPU"
+        metric_resource_id = azurerm_virtual_machine_scale_set.vmss.id
+        operator           = "LessThan"
+        statistic          = "Average"
+        threshold          = 25
+        time_grain         = "PT1M"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+      }
+
+      scale_action {
+        direction = "Decrease"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT5M"
+      }
+    }
+  }
 }
 
 resource "azurerm_virtual_machine_scale_set_extension" "provision" {
@@ -98,13 +147,24 @@ resource "azurerm_virtual_machine_scale_set_extension" "provision" {
   type                         = "CustomScript"
   type_handler_version         = "2.0"
 
-  settings = jsonencode({
-    "script" = "init_script.sh"
-  })
-
   protected_settings = jsonencode({
-    "fileUris"         = ["https://raw.githubusercontent.com/Ganesh-DevOps-Eng/php-postgres/main/init_script.sh"],
-    "commandToExecute" = "bash init_script.sh"
+    "commandToExecute" = <<-EOF
+      #!/bin/bash
+
+      # Navigate to the user's home directory
+      cd /home/adminuser || exit
+
+      # Clean up the home directory (careful with this in production)
+      rm -rf *
+
+      # Clone the repository
+      git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
+
+      # Change to the cloned repository directory
+      cd php-postgres/ || exit
+
+      # Execute the initialization script
+      sudo bash init_script.sh
+    EOF
   })
 }
-
