@@ -23,7 +23,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   sku {
     name     = var.vm_size
     tier     = "Standard"
-    capacity = 2
+    capacity = 1
     
   }
 
@@ -93,9 +93,9 @@ resource "azurerm_monitor_autoscale_setting" "autoscale" {
   profile {
     name = "defaultProfile"
     capacity {
-      minimum = "2"    # Set to match your desired instance count
+      minimum = "1"    # Set to match your desired instance count
       maximum = "5"
-      default = "2"
+      default = "1"
     }
 
     rule {
@@ -140,31 +140,31 @@ resource "azurerm_monitor_autoscale_setting" "autoscale" {
   }
 }
 
-resource "azurerm_virtual_machine_scale_set_extension" "provision" {
-  name                         = "provision-scal_set"
-  virtual_machine_scale_set_id = azurerm_virtual_machine_scale_set.vmss.id
-  publisher                    = "Microsoft.Azure.Extensions"
-  type                         = "CustomScript"
-  type_handler_version         = "2.0"
+# resource "azurerm_virtual_machine_scale_set_extension" "provision" {
+#   name                         = "provision-scal_set"
+#   virtual_machine_scale_set_id = azurerm_virtual_machine_scale_set.vmss.id
+#   publisher                    = "Microsoft.Azure.Extensions"
+#   type                         = "CustomScript"
+#   type_handler_version         = "2.0"
 
-  protected_settings = jsonencode({
-    "commandToExecute" = <<-EOF
-      #!/bin/bash
+#   protected_settings = jsonencode({
+#     "commandToExecute" = <<-EOF
+#       #!/bin/bash
 
-      # Navigate to the user's home directory
-      cd /home/adminuser || exit
+#       # Navigate to the user's home directory
+#       cd /home/adminuser || exit
 
-      # Clean up the home directory (careful with this in production)
-      rm -rf *
+#       # Clean up the home directory (careful with this in production)
+#       rm -rf *
 
-      # Clone the repository
-      git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
+#       # Clone the repository
+#       git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
 
-      # Change to the cloned repository directory
-      cd php-postgres/ || exit
+#       # Change to the cloned repository directory
+#       cd php-postgres/ || exit
 
-      # Execute the initialization script
-      sudo bash init_script.sh
-    EOF
-  })
-}
+#       # Execute the initialization script
+#       sudo bash init_script.sh
+#     EOF
+#   })
+# }
