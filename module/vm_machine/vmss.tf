@@ -59,7 +59,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
 
     ssh_keys {
       path     = "/home/adminuser/.ssh/authorized_keys"
-      key_data = file("C:/Users/cgt_jpr_pc_Admin/.ssh/id_rsa.pub")
+      key_data = file("C:/Users/sanatan_coaching/.ssh/id_rsa.pub")
     }
   }
 
@@ -74,6 +74,19 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.backend_pool.id]
       load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool.id]
     }
+  }
+
+    extension {
+    name                 = "CustomScript"
+    publisher            = "Microsoft.Azure.Extensions"
+    type                 = "CustomScript"
+    type_handler_version = "2.0"
+    settings = <<SETTINGS
+      {
+        "fileUris": ["https://raw.githubusercontent.com/Ganesh-DevOps-Eng/php-postgres/main/init_script.sh"],
+        "commandToExecute": "bash init_script.sh"
+      }
+    SETTINGS
   }
 
   tags = {
@@ -94,7 +107,7 @@ resource "azurerm_monitor_autoscale_setting" "autoscale" {
     name = "defaultProfile"
     capacity {
       minimum = "1"    # Set to match your desired instance count
-      maximum = "5"
+      maximum = "1"
       default = "1"
     }
 
